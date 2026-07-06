@@ -3,6 +3,7 @@ resource "azurerm_storage_object_replication" "storage_object_replications" {
 
   destination_storage_account_id = each.value.destination_storage_account_id
   source_storage_account_id      = each.value.source_storage_account_id
+  metrics_enabled                = each.value.metrics_enabled
 
   rules {
     copy_blobs_created_after     = each.value.rules.copy_blobs_created_after
