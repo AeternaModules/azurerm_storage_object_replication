@@ -5,11 +5,14 @@ resource "azurerm_storage_object_replication" "storage_object_replications" {
   source_storage_account_id      = each.value.source_storage_account_id
   metrics_enabled                = each.value.metrics_enabled
 
-  rules {
-    copy_blobs_created_after     = each.value.rules.copy_blobs_created_after
-    destination_container_name   = each.value.rules.destination_container_name
-    filter_out_blobs_with_prefix = each.value.rules.filter_out_blobs_with_prefix
-    source_container_name        = each.value.rules.source_container_name
+  dynamic "rules" {
+    for_each = each.value.rules
+    content {
+      copy_blobs_created_after     = rules.value.copy_blobs_created_after
+      destination_container_name   = rules.value.destination_container_name
+      filter_out_blobs_with_prefix = rules.value.filter_out_blobs_with_prefix
+      source_container_name        = rules.value.source_container_name
+    }
   }
 }
 
