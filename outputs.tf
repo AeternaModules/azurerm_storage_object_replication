@@ -1,3 +1,7 @@
+output "storage_object_replications_id" {
+  description = "Map of id values across all storage_object_replications, keyed the same as var.storage_object_replications"
+  value       = { for k, v in azurerm_storage_object_replication.storage_object_replications : k => v.id }
+}
 output "storage_object_replications_destination_object_replication_id" {
   description = "Map of destination_object_replication_id values across all storage_object_replications, keyed the same as var.storage_object_replications"
   value       = { for k, v in azurerm_storage_object_replication.storage_object_replications : k => v.destination_object_replication_id }
