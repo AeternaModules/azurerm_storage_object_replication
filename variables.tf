@@ -16,14 +16,22 @@ EOT
   type = map(object({
     destination_storage_account_id = string
     source_storage_account_id      = string
-    metrics_enabled                = optional(bool) # Default: false
+    metrics_enabled                = optional(bool)
     rules = list(object({
-      copy_blobs_created_after     = optional(string) # Default: "OnlyNewObjects"
+      copy_blobs_created_after     = optional(string)
       destination_container_name   = string
       filter_out_blobs_with_prefix = optional(set(string))
       source_container_name        = string
     }))
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.storage_object_replications : (
+        length(v.rules) >= 1
+      )
+    ])
+    error_message = "Each rules list must contain at least 1 items"
+  }
   # --- Unconfirmed validation candidates, derived from azurerm_storage_object_replication's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
   # or a path that crosses a list-typed block (needs its own for_each wrapping).
