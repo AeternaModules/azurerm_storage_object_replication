@@ -32,36 +32,14 @@ EOT
     ])
     error_message = "Each rules list must contain at least 1 items"
   }
-  # --- Unconfirmed validation candidates, derived from azurerm_storage_object_replication's provider source ---
-  # Not auto-enabled: either a bespoke provider validator we can't safely translate,
-  # or a path that crosses a list-typed block (needs its own for_each wrapping).
-  # Review, translate into a real validation{} block above, and delete once confirmed.
-  # path: source_storage_account_id
-  #   source:    [from commonids.ValidateStorageAccountID] !ok
-  # path: source_storage_account_id
-  #   source:    [from commonids.ValidateStorageAccountID] err != nil
-  # path: destination_storage_account_id
-  #   source:    [from commonids.ValidateStorageAccountID] !ok
-  # path: destination_storage_account_id
-  #   source:    [from commonids.ValidateStorageAccountID] err != nil
-  # path: rules.source_container_name
-  #   source:    [from validate.StorageContainerName] !regexp.MustCompile(`^\$root$|^\$web$|^[0-9a-z-]+$`).MatchString(value)
-  # path: rules.source_container_name
-  #   source:    [from validate.StorageContainerName] len(value) < 3 || len(value) > 63
-  # path: rules.source_container_name
-  #   source:    [from validate.StorageContainerName] regexp.MustCompile(`^-`).MatchString(value)
-  # path: rules.destination_container_name
-  #   source:    [from validate.StorageContainerName] !regexp.MustCompile(`^\$root$|^\$web$|^[0-9a-z-]+$`).MatchString(value)
-  # path: rules.destination_container_name
-  #   source:    [from validate.StorageContainerName] len(value) < 3 || len(value) > 63
-  # path: rules.destination_container_name
-  #   source:    [from validate.StorageContainerName] regexp.MustCompile(`^-`).MatchString(value)
-  # path: rules.copy_blobs_created_after
-  #   source:    [from validate.ObjectReplicationCopyBlobsCreatedAfter] !ok
-  # path: rules.copy_blobs_created_after
-  #   source:    [from validate.ObjectReplicationCopyBlobsCreatedAfter] err != nil
-  # path: rules.filter_out_blobs_with_prefix[*]
-  #   condition: length(value) > 0
-  #   message:   must not be empty
+  validation {
+    condition = alltrue([
+      for k, v in var.storage_object_replications : (
+        alltrue([for item in v.rules : (item.filter_out_blobs_with_prefix == null || (alltrue([for x in item.filter_out_blobs_with_prefix : length(x) > 0])))])
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  # Note: 12 additional provider-side validators are enforced at apply time but not mirrored as validation{} blocks here (bespoke or non-mechanically-translatable).
 }
 
